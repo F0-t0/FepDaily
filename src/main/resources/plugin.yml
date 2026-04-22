@@ -1,0 +1,9 @@
+name: FepDaily
+version: '${version}'
+
+main: fepbox.plugin.daily.FepDaily
+api-version: '1.21'
+
+commands:
+  daily:
+    description: Otworz panel Daily
