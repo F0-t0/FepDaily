@@ -11,6 +11,7 @@ import java.util.List;
 
 
 public final class FepDaily extends JavaPlugin {
+    DailyCommand dailyCommand = new DailyCommand(this);
 
     @Override
     public void onEnable() {
@@ -27,8 +28,8 @@ public final class FepDaily extends JavaPlugin {
         pss.save();
 
 
-        getServer().getPluginManager().registerEvents(new GuiHandler(this), this);
-        getCommand("daily").setExecutor(new DailyCommand(this));
+        getServer().getPluginManager().registerEvents(new GuiHandler(this, dailyCommand), this);
+        getCommand("daily").setExecutor(dailyCommand);
 
     }
 

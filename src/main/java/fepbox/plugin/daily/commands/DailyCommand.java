@@ -25,6 +25,11 @@ public class DailyCommand implements CommandExecutor {
     public DailyCommand(FepDaily plugin) {
         this.plugin = plugin;
     }
+    Inventory page2 = Bukkit.createInventory(null, 27, ChatColor.GREEN + "Daily (2/2)");
+    Inventory inventory = Bukkit.createInventory(null, 54, ChatColor.GREEN + "Daily");
+
+    HashMap<Integer, ItemStack> items = new HashMap<Integer, ItemStack>();
+    HashMap<Integer, ItemStack> items2 = new HashMap<Integer, ItemStack>();
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
@@ -38,8 +43,11 @@ public class DailyCommand implements CommandExecutor {
                 pss.save();
             }
 
+            inventory.clear();
+            page2.clear();
+            items.clear();
+            items2.clear();
 
-            Inventory inventory = Bukkit.createInventory(p, 54, ChatColor.GREEN + "Daily");
             ItemStack filler = new ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE);
             ItemStack fillerMonday = new ItemStack(Material.LIME_STAINED_GLASS_PANE);
             ItemStack fillerTuesday = new ItemStack(Material.LIME_STAINED_GLASS_PANE);
@@ -69,6 +77,16 @@ public class DailyCommand implements CommandExecutor {
             ItemMeta fillerSundayMeta = fillerSaturday.getItemMeta();
             fillerSundayMeta.setDisplayName(ChatColor.GREEN + "Niedziela ↓");
             fillerSunday.setItemMeta(fillerSundayMeta);
+
+            ItemStack previous = new ItemStack(Material.ARROW);
+            ItemMeta previousMeta = previous.getItemMeta();
+            previousMeta.setDisplayName(ChatColor.GRAY + "Poprzednia strona");
+            ItemStack next = new ItemStack(Material.ARROW);
+            ItemMeta nextMeta = next.getItemMeta();
+            nextMeta.setDisplayName(ChatColor.GRAY + "Następna strona");
+            previous.setItemMeta(previousMeta);
+            next.setItemMeta(nextMeta);
+
             inventory.setItem(0, filler);
             inventory.setItem(1, fillerMonday);
             inventory.setItem(2, fillerTuesday);
@@ -87,7 +105,7 @@ public class DailyCommand implements CommandExecutor {
             inventory.setItem(36, filler);
             inventory.setItem(44, filler);
             inventory.setItem(45, filler);
-            inventory.setItem(53, filler);
+            inventory.setItem(53, next);
 
             Month month = LocalDate.now().getMonth();
             int monthNumber = month.getValue();
@@ -109,12 +127,13 @@ public class DailyCommand implements CommandExecutor {
                     days = 30;
                     break;
             }
-            HashMap<Integer, ItemStack> items = new HashMap<Integer, ItemStack>();
             List<String> usedPlayers = pss.getConfig().getStringList("players");
             LocalDate firstDayofMonth = LocalDate.now().withDayOfMonth(1);
             DayOfWeek firstDayOfWeek = firstDayofMonth.getDayOfWeek();
             Integer dayofWeek = firstDayOfWeek.getValue();
             int offset = dayofWeek-1;
+
+
 
             int[] daySlots = {
                     10, 11, 12, 13, 14, 15, 16,
@@ -123,11 +142,17 @@ public class DailyCommand implements CommandExecutor {
                     37, 38, 39, 40, 41, 42, 43,
                     46, 47, 48, 49, 50, 51, 52
             };
+
             for (int i = 1; i <= days && i <= daySlots.length; i++) {
                 int Todaynr = LocalDate.now().getDayOfMonth();
                 int index = offset + (i - 1);
                 LocalDate date = LocalDate.now().withDayOfMonth(i);
-                int slot = daySlots[index];
+                int slot = 0;
+                if (index < 35) {
+                    slot = daySlots[index];
+                } else {
+                    break;
+                }
                 if (Todaynr > i) {
                     ItemStack item = new ItemStack(Material.MINECART);
                     ItemMeta meta = item.getItemMeta();
@@ -167,7 +192,156 @@ public class DailyCommand implements CommandExecutor {
                     item.setItemMeta(meta);
                     items.put(slot, item);
                 }
+            }
+            if (offset > 5) {
+                int[] daySlotsp2 = {
+                        19,
+                        20
+                };
 
+
+
+
+                page2.setItem(0, filler);
+                page2.setItem(1, fillerMonday);
+                page2.setItem(2, fillerTuesday);
+                page2.setItem(3, fillerWednesday);
+                page2.setItem(4, fillerThursday);
+                page2.setItem(5, fillerFriday);
+                page2.setItem(6, fillerSaturday);
+                page2.setItem(7, fillerSunday);
+                page2.setItem(8, filler);
+                page2.setItem(9, filler);
+                page2.setItem(17, filler);
+                page2.setItem(18, previous);
+                page2.setItem(26, filler);
+                days = days - 29;
+                int i2 = 30;
+                for (int i = 1; i <= days && i <= daySlotsp2.length; i++) {
+                    int Todaynr = LocalDate.now().getDayOfMonth();
+                    LocalDate date = LocalDate.now().withDayOfMonth(i+29);
+                    int slot = 0;
+                    if (i == 1) {
+                        slot = 10;
+                    } else if (i == 2) {
+                        slot = 11;
+                    }
+                    if (Todaynr > i2) {
+                        ItemStack item = new ItemStack(Material.MINECART);
+                        ItemMeta meta = item.getItemMeta();
+                        meta.setDisplayName(ChatColor.RED + date.toString());
+                        List<String> lore = new ArrayList<>();
+                        lore.add(ChatColor.RED + "§lOdebrałeś lub przegapiłeś to daily!");
+                        meta.setLore(lore);
+                        item.setItemMeta(meta);
+                        items2.put(slot, item);
+                    } else if (Todaynr == i2) {
+                        if (usedPlayers.contains(p.getUniqueId().toString())) {
+                            ItemStack item = new ItemStack(Material.HOPPER_MINECART);
+                            ItemMeta meta = item.getItemMeta();
+                            meta.setDisplayName(ChatColor.GOLD + date.toString());
+                            List<String> lore = new ArrayList<>();
+                            lore.add(ChatColor.GOLD + "§lOdebrałeś już to daily!");
+                            meta.setLore(lore);
+                            item.setItemMeta(meta);
+                            items2.put(slot, item);
+                        } else {
+                            ItemStack item = new ItemStack(Material.CHEST_MINECART);
+                            ItemMeta meta = item.getItemMeta();
+                            meta.setDisplayName(ChatColor.GREEN + date.toString());
+                            List<String> lore = new ArrayList<>();
+                            lore.add(ChatColor.GREEN + "§lKliknij aby odebrać daily!");
+                            meta.setLore(lore);
+                            item.setItemMeta(meta);
+                            items2.put(slot, item);
+                        }
+                    } else if (Todaynr < i2) {
+                        ItemStack item = new ItemStack(Material.FURNACE_MINECART);
+                        List<String> lore = new ArrayList<>();
+                        ItemMeta meta = item.getItemMeta();
+                        meta.setDisplayName(ChatColor.GRAY + date.toString());
+                        lore.add(ChatColor.GRAY + "§lJeszcze nie czas na odebranie tego!");
+                        meta.setLore(lore);
+                        item.setItemMeta(meta);
+                        items2.put(slot, item);
+                    }
+                    i2++;
+                }
+            } else if (offset > 4) {
+                int[] daySlotsp2 = {
+                        10,
+                };
+
+
+
+
+                page2.setItem(0, filler);
+                page2.setItem(1, fillerMonday);
+                page2.setItem(2, fillerTuesday);
+                page2.setItem(3, fillerWednesday);
+                page2.setItem(4, fillerThursday);
+                page2.setItem(5, fillerFriday);
+                page2.setItem(6, fillerSaturday);
+                page2.setItem(7, fillerSunday);
+                page2.setItem(8, filler);
+                page2.setItem(9, filler);
+                page2.setItem(17, filler);
+                page2.setItem(18, previous);
+                page2.setItem(26, filler);
+                days = days - 29;
+                int i2 = 30;
+                for (int i = 1; i <= days && i <= daySlotsp2.length; i++) {
+                    int Todaynr = LocalDate.now().getDayOfMonth();
+                    int index = (i - 1);
+                    LocalDate date = LocalDate.now().withDayOfMonth(i+29);
+                    int slot = 0;
+                    if (i == 1) {
+                        slot = 10;
+                    }
+                    if (Todaynr > i2) {
+                        ItemStack item = new ItemStack(Material.MINECART);
+                        ItemMeta meta = item.getItemMeta();
+                        meta.setDisplayName(ChatColor.RED + date.toString());
+                        List<String> lore = new ArrayList<>();
+                        lore.add(ChatColor.RED + "§lOdebrałeś lub przegapiłeś to daily!");
+                        meta.setLore(lore);
+                        item.setItemMeta(meta);
+                        items2.put(slot, item);
+                    } else if (Todaynr == i2) {
+                        if (usedPlayers.contains(p.getUniqueId().toString())) {
+                            ItemStack item = new ItemStack(Material.HOPPER_MINECART);
+                            ItemMeta meta = item.getItemMeta();
+                            meta.setDisplayName(ChatColor.GOLD + date.toString());
+                            List<String> lore = new ArrayList<>();
+                            lore.add(ChatColor.GOLD + "§lOdebrałeś już to daily!");
+                            meta.setLore(lore);
+                            item.setItemMeta(meta);
+                            items2.put(slot, item);
+                        } else {
+                            ItemStack item = new ItemStack(Material.CHEST_MINECART);
+                            ItemMeta meta = item.getItemMeta();
+                            meta.setDisplayName(ChatColor.GREEN + date.toString());
+                            List<String> lore = new ArrayList<>();
+                            lore.add(ChatColor.GREEN + "§lKliknij aby odebrać daily!");
+                            meta.setLore(lore);
+                            item.setItemMeta(meta);
+                            items2.put(slot, item);
+                        }
+                    } else if (Todaynr < i2) {
+                        ItemStack item = new ItemStack(Material.FURNACE_MINECART);
+                        List<String> lore = new ArrayList<>();
+                        ItemMeta meta = item.getItemMeta();
+                        meta.setDisplayName(ChatColor.GRAY + date.toString());
+                        lore.add(ChatColor.GRAY + "§lJeszcze nie czas na odebranie tego!");
+                        meta.setLore(lore);
+                        item.setItemMeta(meta);
+                        items2.put(slot, item);
+                    }
+                    i2++;
+                }
+            }
+            else {
+                inventory.setItem(53, filler);
             }
             p.openInventory(inventory);
             for (int i = 0; i < daySlots.length; i += 2) {
@@ -192,5 +366,18 @@ public class DailyCommand implements CommandExecutor {
         }
 
         return true;
+    }
+    public Inventory getPage1() {
+        return inventory;
+    }
+    public Inventory getPage2() {
+        return page2;
+    }
+
+    public HashMap<Integer, ItemStack> getItems1() {
+        return items;
+    }
+    public HashMap<Integer, ItemStack> getItems2() {
+        return items2;
     }
 }

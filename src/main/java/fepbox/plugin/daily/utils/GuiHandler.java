@@ -1,6 +1,7 @@
 package fepbox.plugin.daily.utils;
 
 import fepbox.plugin.daily.FepDaily;
+import fepbox.plugin.daily.commands.DailyCommand;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -9,14 +10,19 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 
 public class GuiHandler implements Listener {
     FepDaily plugin;
-    public GuiHandler(FepDaily plugin) {
+    DailyCommand daily;
+    public GuiHandler(FepDaily plugin, DailyCommand daily) {
         this.plugin = plugin;
+        this.daily = daily;
     }
 
     @EventHandler
@@ -45,8 +51,51 @@ public class GuiHandler implements Listener {
                     players.add(p.getUniqueId().toString());
                     pss.getConfig().set("players", players);
                     pss.save();
+                } else if (clickdItem.getType() == Material.ARROW) {
+                    p.closeInventory();
+                    p.openInventory(daily.getPage2());
+                    int[] daySlotsp2 = {
+                            10, 11, 12, 13, 14, 15, 16,
+                            19, 20, 21, 22, 23, 24, 25,
+                    };
+                    Inventory inventory = daily.getPage2();
+                    HashMap<Integer, ItemStack> items = daily.getItems2();
+                    for (int i = 0; i < inventory.getSize(); i++) {
+                        if (items.containsKey(i)) {
+                            inventory.setItem(i, items.get(i));
+                        }
+                    }
                 } else {
                     p.playSound(p.getLocation(), Sound.BLOCK_METAL_PRESSURE_PLATE_CLICK_ON, 1.0f, 1.0f);
+                }
+            } else if (e.getView().getTitle().equalsIgnoreCase(ChatColor.GREEN + "Daily (2/2)")) {
+                e.setCancelled(true);
+                PlayersStorage pss = new PlayersStorage(plugin, "players.yml");
+                List<String> players = pss.getConfig().getStringList("players");
+
+                switch (clickdItem.getType()) {
+                    case ARROW -> {
+                        p.closeInventory();
+                        p.openInventory(daily.getPage1());
+                    }
+                    case CHEST_MINECART -> {
+                        if (!players.contains(p.getUniqueId().toString())) {
+                            String day = String.valueOf(LocalDate.now().getDayOfMonth());
+                            List<String> cmds = plugin.getConfig().getStringList("commands."+day);
+                            for (String cmd : cmds) {
+                                String parsedCommand = cmd.replace("%player%", e.getWhoClicked().getName());
+                                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), parsedCommand);
+                            }
+                            p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
+                        } else {
+                            p.sendMessage(ChatColor.RED + "Już odebrałeś Daily!!");
+                        }
+                        p.closeInventory();
+                        players.add(p.getUniqueId().toString());
+                        pss.getConfig().set("players", players);
+                        pss.save();
+                    }
+
                 }
             }
         }
