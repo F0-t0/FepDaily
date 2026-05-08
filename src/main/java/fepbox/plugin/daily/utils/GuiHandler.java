@@ -31,19 +31,24 @@ public class GuiHandler implements Listener {
             var clickdItem = e.getCurrentItem();
             if (clickdItem == null) {return;}
 
+            DailyGuiSession session = daily.getSession(p.getUniqueId());
+
             if (e.getView().getTitle().equalsIgnoreCase(ChatColor.GREEN + "Daily")) {
                 e.setCancelled(true);
                 PlayersStorage pss = new PlayersStorage(plugin, "players.yml");
                 List<String> players = pss.getConfig().getStringList("players");
                 if (clickdItem.getType() == Material.CHEST_MINECART) {
                     if (!players.contains(p.getUniqueId().toString())) {
-                        String day = String.valueOf(LocalDate.now().getDayOfMonth());
+                        String day = String.valueOf(LocalDate.now().getDayOfWeek().getValue());
                         List<String> cmds = plugin.getConfig().getStringList("commands."+day);
                         for (String cmd : cmds) {
                             String parsedCommand = cmd.replace("%player%", e.getWhoClicked().getName());
                             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), parsedCommand);
                         }
                         p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
+                        String message = plugin.getConfig().getString("broadcast");
+                        String parsedMessage = message.replace("%player%", e.getWhoClicked().getName());
+                        Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', parsedMessage));
                     } else {
                         p.sendMessage(ChatColor.RED + "Już odebrałeś Daily!!");
                     }
@@ -53,16 +58,16 @@ public class GuiHandler implements Listener {
                     pss.save();
                 } else if (clickdItem.getType() == Material.ARROW) {
                     p.closeInventory();
-                    p.openInventory(daily.getPage2());
+                    p.openInventory(session.page2());
                     int[] daySlotsp2 = {
                             10, 11, 12, 13, 14, 15, 16,
                             19, 20, 21, 22, 23, 24, 25,
                     };
-                    Inventory inventory = daily.getPage2();
-                    HashMap<Integer, ItemStack> items = daily.getItems2();
+                    Inventory inventory = session.page2();
+                    HashMap<Integer, ItemStack> items = session.items2();
                     for (int i = 0; i < inventory.getSize(); i++) {
                         if (items.containsKey(i)) {
-                            inventory.setItem(i, items.get(i));
+                            session.page2().setItem(i, items.get(i));
                         }
                     }
                 } else {
@@ -76,11 +81,11 @@ public class GuiHandler implements Listener {
                 switch (clickdItem.getType()) {
                     case ARROW -> {
                         p.closeInventory();
-                        p.openInventory(daily.getPage1());
+                        p.openInventory(session.page1());
                     }
                     case CHEST_MINECART -> {
                         if (!players.contains(p.getUniqueId().toString())) {
-                            String day = String.valueOf(LocalDate.now().getDayOfMonth());
+                            String day = String.valueOf(LocalDate.now().getDayOfWeek().getValue());
                             List<String> cmds = plugin.getConfig().getStringList("commands."+day);
                             for (String cmd : cmds) {
                                 String parsedCommand = cmd.replace("%player%", e.getWhoClicked().getName());

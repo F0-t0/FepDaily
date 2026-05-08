@@ -1,6 +1,7 @@
 package fepbox.plugin.daily.commands;
 
 import fepbox.plugin.daily.FepDaily;
+import fepbox.plugin.daily.utils.DailyGuiSession;
 import fepbox.plugin.daily.utils.PlayersStorage;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -16,24 +17,25 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.Month;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class DailyCommand implements CommandExecutor {
     FepDaily plugin;
+    private final Map<UUID, DailyGuiSession> sessions = new HashMap<>();
+
     public DailyCommand(FepDaily plugin) {
         this.plugin = plugin;
     }
-    Inventory page2 = Bukkit.createInventory(null, 27, ChatColor.GREEN + "Daily (2/2)");
-    Inventory inventory = Bukkit.createInventory(null, 54, ChatColor.GREEN + "Daily");
-
-    HashMap<Integer, ItemStack> items = new HashMap<Integer, ItemStack>();
-    HashMap<Integer, ItemStack> items2 = new HashMap<Integer, ItemStack>();
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (sender instanceof Player p) {
+            Inventory page2 = Bukkit.createInventory(null, 27, ChatColor.GREEN + "Daily (2/2)");
+            Inventory inventory = Bukkit.createInventory(null, 54, ChatColor.GREEN + "Daily");
+
+            HashMap<Integer, ItemStack> items = new HashMap<Integer, ItemStack>();
+            HashMap<Integer, ItemStack> items2 = new HashMap<Integer, ItemStack>();
+
             PlayersStorage pss = new PlayersStorage(plugin, "players.yml");
             if (!pss.getConfig().getString("date").equalsIgnoreCase(LocalDate.now().toString())) {
                 List<String> players = pss.getConfig().getStringList("date");
@@ -54,8 +56,8 @@ public class DailyCommand implements CommandExecutor {
             ItemStack fillerWednesday = new ItemStack(Material.LIME_STAINED_GLASS_PANE);
             ItemStack fillerThursday = new ItemStack(Material.LIME_STAINED_GLASS_PANE);
             ItemStack fillerFriday = new ItemStack(Material.LIME_STAINED_GLASS_PANE);
-            ItemStack fillerSaturday = new ItemStack(Material.LIME_STAINED_GLASS_PANE);
-            ItemStack fillerSunday = new ItemStack(Material.LIME_STAINED_GLASS_PANE);
+            ItemStack fillerSaturday = new ItemStack(Material.ORANGE_STAINED_GLASS_PANE);
+            ItemStack fillerSunday = new ItemStack(Material.ORANGE_STAINED_GLASS_PANE);
             ItemMeta fillerMondayMeta = fillerMonday.getItemMeta();
             fillerMondayMeta.setDisplayName(ChatColor.GREEN + "Poniedziałek ↓");
             fillerMonday.setItemMeta(fillerMondayMeta);
@@ -72,10 +74,10 @@ public class DailyCommand implements CommandExecutor {
             fillerFridayMeta.setDisplayName(ChatColor.GREEN+"Piątek ↓");
             fillerFriday.setItemMeta(fillerFridayMeta);
             ItemMeta fillerSaturdayMeta = fillerThursday.getItemMeta();
-            fillerSaturdayMeta.setDisplayName(ChatColor.GREEN+"Sobota ↓");
+            fillerSaturdayMeta.setDisplayName(ChatColor.GOLD+"Sobota ↓");
             fillerSaturday.setItemMeta(fillerSaturdayMeta);
             ItemMeta fillerSundayMeta = fillerSaturday.getItemMeta();
-            fillerSundayMeta.setDisplayName(ChatColor.GREEN + "Niedziela ↓");
+            fillerSundayMeta.setDisplayName(ChatColor.GOLD + "Niedziela ↓");
             fillerSunday.setItemMeta(fillerSundayMeta);
 
             ItemStack previous = new ItemStack(Material.ARROW);
@@ -343,6 +345,8 @@ public class DailyCommand implements CommandExecutor {
             else {
                 inventory.setItem(53, filler);
             }
+            sessions.put(p.getUniqueId(), new DailyGuiSession(inventory, page2, items, items2));
+
             p.openInventory(inventory);
             for (int i = 0; i < daySlots.length; i += 2) {
                 final int firstSlot = daySlots[i];
@@ -367,17 +371,8 @@ public class DailyCommand implements CommandExecutor {
 
         return true;
     }
-    public Inventory getPage1() {
-        return inventory;
-    }
-    public Inventory getPage2() {
-        return page2;
-    }
 
-    public HashMap<Integer, ItemStack> getItems1() {
-        return items;
-    }
-    public HashMap<Integer, ItemStack> getItems2() {
-        return items2;
+    public DailyGuiSession getSession(UUID uuid) {
+        return sessions.get(uuid);
     }
 }
