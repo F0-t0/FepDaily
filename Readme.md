@@ -21,9 +21,6 @@ Installation:
 
     Start the server
 
-    Add your bot token and channel ID to the config
-
-    Restart the server
 
 License
 
