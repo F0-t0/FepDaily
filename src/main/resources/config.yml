@@ -1,3 +1,5 @@
+language: pl
+
 commands:
   "1":
     - give %player% diamond 5
@@ -13,4 +15,5 @@ commands:
     - give %player% diamond 5
   "7":
     - give %player% diamond 5
-broadcast: "&a%player% właśnie odebrał Daily, ty też możesz to zrobić wpisując &c&l/daily"
+broadcast: "&a%player% właśnie odebrał Daily, ty też możesz to zrobić wpisując &c&l/daily" #Just the message for the whole server to see after someone claims the daily
+# %player% is a placeholder for the player's name

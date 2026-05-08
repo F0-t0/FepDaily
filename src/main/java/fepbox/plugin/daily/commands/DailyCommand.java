@@ -30,6 +30,11 @@ public class DailyCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (sender instanceof Player p) {
+            boolean isPolish;
+            String language = plugin.getConfig().getString("language");
+            assert language != null;
+            if (language.equals("pl")) {isPolish = true;} else {isPolish = false;}
+
             Inventory page2 = Bukkit.createInventory(null, 27, ChatColor.GREEN + "Daily (2/2)");
             Inventory inventory = Bukkit.createInventory(null, 54, ChatColor.GREEN + "Daily");
 
@@ -58,34 +63,52 @@ public class DailyCommand implements CommandExecutor {
             ItemStack fillerFriday = new ItemStack(Material.LIME_STAINED_GLASS_PANE);
             ItemStack fillerSaturday = new ItemStack(Material.ORANGE_STAINED_GLASS_PANE);
             ItemStack fillerSunday = new ItemStack(Material.ORANGE_STAINED_GLASS_PANE);
+
+            // Meta thingies
             ItemMeta fillerMondayMeta = fillerMonday.getItemMeta();
-            fillerMondayMeta.setDisplayName(ChatColor.GREEN + "Poniedziałek ↓");
-            fillerMonday.setItemMeta(fillerMondayMeta);
             ItemMeta fillerTuesdayMeta = fillerTuesday.getItemMeta();
-            fillerTuesdayMeta.setDisplayName(ChatColor.GREEN + "Wtorek ↓");
-            fillerTuesday.setItemMeta(fillerTuesdayMeta);
-            ItemMeta fillerwednesdayMeta = fillerWednesday.getItemMeta();
-            fillerwednesdayMeta.setDisplayName(ChatColor.GREEN+"Środa ↓");
-            fillerWednesday.setItemMeta(fillerwednesdayMeta);
+            ItemMeta fillerWednesdayMeta = fillerWednesday.getItemMeta();
             ItemMeta fillerThursdayMeta = fillerThursday.getItemMeta();
-            fillerThursdayMeta.setDisplayName(ChatColor.GREEN+"Czwartek ↓");
+            ItemMeta fillerFridayMeta = fillerFriday.getItemMeta();
+            ItemMeta fillerSaturdayMeta = fillerSaturday.getItemMeta();
+            ItemMeta fillerSundayMeta = fillerSunday.getItemMeta();
+
+            if (isPolish) {
+                fillerMondayMeta.setDisplayName(ChatColor.GREEN + "Poniedziałek ↓");
+                fillerTuesdayMeta.setDisplayName(ChatColor.GREEN + "Wtorek ↓");
+                fillerWednesdayMeta.setDisplayName(ChatColor.GREEN + "Środa ↓");
+                fillerThursdayMeta.setDisplayName(ChatColor.GREEN + "Czwartek ↓");
+                fillerFridayMeta.setDisplayName(ChatColor.GREEN + "Piątek ↓");
+                fillerSaturdayMeta.setDisplayName(ChatColor.GOLD + "Sobota ↓");
+                fillerSundayMeta.setDisplayName(ChatColor.GOLD + "Niedziela ↓");
+            } else {
+                fillerMondayMeta.setDisplayName(ChatColor.GREEN + "Monday ↓");
+                fillerTuesdayMeta.setDisplayName(ChatColor.GREEN + "Tuesday ↓");
+                fillerWednesdayMeta.setDisplayName(ChatColor.GREEN + "Wednesday ↓");
+                fillerThursdayMeta.setDisplayName(ChatColor.GREEN + "Thursday ↓");
+                fillerFridayMeta.setDisplayName(ChatColor.GREEN + "Friday ↓");
+                fillerSaturdayMeta.setDisplayName(ChatColor.GOLD + "Saturday ↓");
+                fillerSundayMeta.setDisplayName(ChatColor.GOLD + "Sunday ↓");
+            }
+
+            fillerMonday.setItemMeta(fillerMondayMeta);
+            fillerTuesday.setItemMeta(fillerTuesdayMeta);
+            fillerWednesday.setItemMeta(fillerWednesdayMeta);
             fillerThursday.setItemMeta(fillerThursdayMeta);
-            ItemMeta fillerFridayMeta = fillerThursday.getItemMeta();
-            fillerFridayMeta.setDisplayName(ChatColor.GREEN+"Piątek ↓");
             fillerFriday.setItemMeta(fillerFridayMeta);
-            ItemMeta fillerSaturdayMeta = fillerThursday.getItemMeta();
-            fillerSaturdayMeta.setDisplayName(ChatColor.GOLD+"Sobota ↓");
             fillerSaturday.setItemMeta(fillerSaturdayMeta);
-            ItemMeta fillerSundayMeta = fillerSaturday.getItemMeta();
-            fillerSundayMeta.setDisplayName(ChatColor.GOLD + "Niedziela ↓");
             fillerSunday.setItemMeta(fillerSundayMeta);
 
             ItemStack previous = new ItemStack(Material.ARROW);
             ItemMeta previousMeta = previous.getItemMeta();
-            previousMeta.setDisplayName(ChatColor.GRAY + "Poprzednia strona");
             ItemStack next = new ItemStack(Material.ARROW);
             ItemMeta nextMeta = next.getItemMeta();
-            nextMeta.setDisplayName(ChatColor.GRAY + "Następna strona");
+            if (isPolish) {previousMeta.setDisplayName(ChatColor.GRAY + "Poprzednia strona");
+                nextMeta.setDisplayName(ChatColor.GRAY + "Następna strona");}
+            else {previousMeta.setDisplayName(ChatColor.GRAY + "Previous Page");
+                nextMeta.setDisplayName(ChatColor.GRAY + "Next Page");}
+
+
             previous.setItemMeta(previousMeta);
             next.setItemMeta(nextMeta);
 
@@ -145,6 +168,22 @@ public class DailyCommand implements CommandExecutor {
                     46, 47, 48, 49, 50, 51, 52
             };
 
+            String dailyBefore;
+            String dailyAfter;
+            String dailyRightNow;
+            String dailyClaimed;
+            if (isPolish) {
+                dailyBefore = "§lOdebrałeś lub przegapiłeś już to daily!";
+                dailyAfter = "§lJeszcze nie czas na odebranie tego daily!";
+                dailyRightNow = "§lKliknij aby odebrać to daily!";
+                dailyClaimed = "§lOdebrałeś już to daily!";
+            } else {
+                dailyBefore = "§lYou already claimed this daily or you missed it!";
+                dailyAfter = "§lIt's not time yet to claim the daily!";
+                dailyRightNow = "§lClick here to claim the daily";
+                dailyClaimed = "§lYou already claimed the daily!";
+            }
+
             for (int i = 1; i <= days && i <= daySlots.length; i++) {
                 int Todaynr = LocalDate.now().getDayOfMonth();
                 int index = offset + (i - 1);
@@ -160,7 +199,7 @@ public class DailyCommand implements CommandExecutor {
                     ItemMeta meta = item.getItemMeta();
                     meta.setDisplayName(ChatColor.RED + date.toString());
                     List<String> lore = new ArrayList<>();
-                    lore.add(ChatColor.RED + "§lOdebrałeś lub przegapiłeś to daily!");
+                    lore.add(ChatColor.RED + dailyBefore);
                     meta.setLore(lore);
                     item.setItemMeta(meta);
                     items.put(slot, item);
@@ -170,7 +209,7 @@ public class DailyCommand implements CommandExecutor {
                         ItemMeta meta = item.getItemMeta();
                         meta.setDisplayName(ChatColor.GOLD + date.toString());
                         List<String> lore = new ArrayList<>();
-                        lore.add(ChatColor.GOLD + "§lOdebrałeś już to daily!");
+                        lore.add(ChatColor.GOLD + dailyClaimed);
                         meta.setLore(lore);
                         item.setItemMeta(meta);
                         items.put(slot, item);
@@ -179,7 +218,7 @@ public class DailyCommand implements CommandExecutor {
                         ItemMeta meta = item.getItemMeta();
                         meta.setDisplayName(ChatColor.GREEN + date.toString());
                         List<String> lore = new ArrayList<>();
-                        lore.add(ChatColor.GREEN + "§lKliknij aby odebrać daily!");
+                        lore.add(ChatColor.GREEN + dailyRightNow);
                         meta.setLore(lore);
                         item.setItemMeta(meta);
                         items.put(slot, item);
@@ -189,7 +228,7 @@ public class DailyCommand implements CommandExecutor {
                     List<String> lore = new ArrayList<>();
                     ItemMeta meta = item.getItemMeta();
                     meta.setDisplayName(ChatColor.GRAY + date.toString());
-                    lore.add(ChatColor.GRAY + "§lJeszcze nie czas na odebranie tego!");
+                    lore.add(ChatColor.GRAY + dailyAfter);
                     meta.setLore(lore);
                     item.setItemMeta(meta);
                     items.put(slot, item);
@@ -233,7 +272,7 @@ public class DailyCommand implements CommandExecutor {
                         ItemMeta meta = item.getItemMeta();
                         meta.setDisplayName(ChatColor.RED + date.toString());
                         List<String> lore = new ArrayList<>();
-                        lore.add(ChatColor.RED + "§lOdebrałeś lub przegapiłeś to daily!");
+                        lore.add(ChatColor.RED + dailyBefore);
                         meta.setLore(lore);
                         item.setItemMeta(meta);
                         items2.put(slot, item);
@@ -243,7 +282,7 @@ public class DailyCommand implements CommandExecutor {
                             ItemMeta meta = item.getItemMeta();
                             meta.setDisplayName(ChatColor.GOLD + date.toString());
                             List<String> lore = new ArrayList<>();
-                            lore.add(ChatColor.GOLD + "§lOdebrałeś już to daily!");
+                            lore.add(ChatColor.GOLD + dailyClaimed);
                             meta.setLore(lore);
                             item.setItemMeta(meta);
                             items2.put(slot, item);
@@ -252,7 +291,7 @@ public class DailyCommand implements CommandExecutor {
                             ItemMeta meta = item.getItemMeta();
                             meta.setDisplayName(ChatColor.GREEN + date.toString());
                             List<String> lore = new ArrayList<>();
-                            lore.add(ChatColor.GREEN + "§lKliknij aby odebrać daily!");
+                            lore.add(ChatColor.GREEN + dailyRightNow);
                             meta.setLore(lore);
                             item.setItemMeta(meta);
                             items2.put(slot, item);
@@ -262,7 +301,7 @@ public class DailyCommand implements CommandExecutor {
                         List<String> lore = new ArrayList<>();
                         ItemMeta meta = item.getItemMeta();
                         meta.setDisplayName(ChatColor.GRAY + date.toString());
-                        lore.add(ChatColor.GRAY + "§lJeszcze nie czas na odebranie tego!");
+                        lore.add(ChatColor.GRAY + dailyAfter);
                         meta.setLore(lore);
                         item.setItemMeta(meta);
                         items2.put(slot, item);
@@ -305,7 +344,7 @@ public class DailyCommand implements CommandExecutor {
                         ItemMeta meta = item.getItemMeta();
                         meta.setDisplayName(ChatColor.RED + date.toString());
                         List<String> lore = new ArrayList<>();
-                        lore.add(ChatColor.RED + "§lOdebrałeś lub przegapiłeś to daily!");
+                        lore.add(ChatColor.RED + dailyBefore);
                         meta.setLore(lore);
                         item.setItemMeta(meta);
                         items2.put(slot, item);
@@ -315,7 +354,7 @@ public class DailyCommand implements CommandExecutor {
                             ItemMeta meta = item.getItemMeta();
                             meta.setDisplayName(ChatColor.GOLD + date.toString());
                             List<String> lore = new ArrayList<>();
-                            lore.add(ChatColor.GOLD + "§lOdebrałeś już to daily!");
+                            lore.add(ChatColor.GOLD + dailyClaimed);
                             meta.setLore(lore);
                             item.setItemMeta(meta);
                             items2.put(slot, item);
@@ -324,7 +363,7 @@ public class DailyCommand implements CommandExecutor {
                             ItemMeta meta = item.getItemMeta();
                             meta.setDisplayName(ChatColor.GREEN + date.toString());
                             List<String> lore = new ArrayList<>();
-                            lore.add(ChatColor.GREEN + "§lKliknij aby odebrać daily!");
+                            lore.add(ChatColor.GREEN + dailyRightNow);
                             meta.setLore(lore);
                             item.setItemMeta(meta);
                             items2.put(slot, item);
@@ -334,7 +373,7 @@ public class DailyCommand implements CommandExecutor {
                         List<String> lore = new ArrayList<>();
                         ItemMeta meta = item.getItemMeta();
                         meta.setDisplayName(ChatColor.GRAY + date.toString());
-                        lore.add(ChatColor.GRAY + "§lJeszcze nie czas na odebranie tego!");
+                        lore.add(ChatColor.GRAY + dailyAfter);
                         meta.setLore(lore);
                         item.setItemMeta(meta);
                         items2.put(slot, item);

@@ -32,7 +32,10 @@ public class GuiHandler implements Listener {
             if (clickdItem == null) {return;}
 
             DailyGuiSession session = daily.getSession(p.getUniqueId());
-
+            boolean isPolish;
+            String language = plugin.getConfig().getString("language");
+            assert language != null;
+            if (language.equals("pl")) {isPolish = true;} else {isPolish = false;}
             if (e.getView().getTitle().equalsIgnoreCase(ChatColor.GREEN + "Daily")) {
                 e.setCancelled(true);
                 PlayersStorage pss = new PlayersStorage(plugin, "players.yml");
@@ -50,7 +53,12 @@ public class GuiHandler implements Listener {
                         String parsedMessage = message.replace("%player%", e.getWhoClicked().getName());
                         Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', parsedMessage));
                     } else {
-                        p.sendMessage(ChatColor.RED + "Już odebrałeś Daily!!");
+                        if (isPolish) {
+                            p.sendMessage(ChatColor.RED + "Już odebrałeś Daily!!");
+                        } else {
+                            p.sendMessage(ChatColor.RED + "You already claimed the daily reward!!");
+                        }
+
                     }
                     p.closeInventory();
                     players.add(p.getUniqueId().toString());
@@ -93,7 +101,11 @@ public class GuiHandler implements Listener {
                             }
                             p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
                         } else {
-                            p.sendMessage(ChatColor.RED + "Już odebrałeś Daily!!");
+                            if (isPolish) {
+                                p.sendMessage(ChatColor.RED + "Już odebrałeś Daily!!");
+                            } else {
+                                p.sendMessage(ChatColor.RED + "You already claimed the daily reward!!");
+                            }
                         }
                         p.closeInventory();
                         players.add(p.getUniqueId().toString());
