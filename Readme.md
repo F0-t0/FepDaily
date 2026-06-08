@@ -6,6 +6,12 @@
 <strong>Spigot plugin for daily rewards.</strong>
 </p>
 
+A plugin made for a daily reward system based on
+a 31 day calendar with a 7 day based configuration
+in the configuration you just put the commands that you want
+to be executed per day and you're finished configuring!
+![The GUI of the Plugin](https://cdn.modrinth.com/data/cached_images/e5d3ac52b71064d6bfcfecec3d7cc59139fc8463.png)
+
 <p align="center">
 <img alt="release" src="https://img.shields.io/badge/release-2.0-2f81f7?style=flat-square">
 <img alt="paper" src="https://img.shields.io/badge/Paper-1.20.6%2B-43b581?style=flat-square">
